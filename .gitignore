@@ -1,0 +1,56 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-electron
+dist-react
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Build output
+build
+out
+release/
+
+# Compiled TypeScript artifacts (source .ts files are tracked)
+electron/main.js
+electron/main.d.ts
+electron/preload.js
+electron/preload.d.ts
+vite.config.js
+vite.config.d.ts
+*.tsbuildinfo
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# User data (vocabulary storage)
+user-data/
+
+# Dev/test artifacts
+test-vocab-project/
+view-localStorage-data.html
