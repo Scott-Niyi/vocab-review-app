@@ -1,19 +1,8 @@
-// Default import works with Electron 40 ESM (named imports fail in Node.js 24)
-import electron from 'electron';
-import type { App, BrowserWindow as BW, IpcMain, Dialog } from 'electron';
+import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import fs from 'fs';
 
-const { app, BrowserWindow, ipcMain, dialog } = electron as unknown as {
-  app: App; BrowserWindow: typeof BW; ipcMain: IpcMain; dialog: Dialog;
-};
-
-// ES modules compatibility
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-let mainWindow: BW | null = null;
+let mainWindow: BrowserWindow | null = null;
 
 // User data directory — initialized in app.whenReady() to avoid calling
 // app.getPath() at module-load time before Electron bindings are ready.
@@ -95,7 +84,7 @@ ipcMain.handle('fs:selectFile', async () => {
 
     const selectedPath = result.filePaths[0];
     const fileName = path.basename(selectedPath);
-    
+
     return { success: true, filePath: fileName };
   } catch (error: any) {
     return { success: false, error: error.message };
@@ -115,7 +104,7 @@ ipcMain.handle('fs:selectProjectFolder', async () => {
     }
 
     const projectPath = result.filePaths[0];
-    
+
     // Check if vocabulary.json exists
     const vocabFile = path.join(projectPath, 'vocabulary.json');
     if (!fs.existsSync(vocabFile)) {
@@ -124,7 +113,7 @@ ipcMain.handle('fs:selectProjectFolder', async () => {
 
     // Save to recent projects
     saveRecentProject(projectPath);
-    
+
     return { success: true, projectPath };
   } catch (error: any) {
     return { success: false, error: error.message };
@@ -145,7 +134,7 @@ ipcMain.handle('fs:createNewProject', async () => {
     }
 
     const projectPath = result.filePath;
-    
+
     // Create project directory
     if (!fs.existsSync(projectPath)) {
       fs.mkdirSync(projectPath, { recursive: true });
@@ -224,7 +213,7 @@ ipcMain.handle('fs:createNewProject', async () => {
 
     // Save to recent projects
     saveRecentProject(projectPath);
-    
+
     return { success: true, projectPath };
   } catch (error: any) {
     return { success: false, error: error.message };
@@ -234,7 +223,7 @@ ipcMain.handle('fs:createNewProject', async () => {
 ipcMain.handle('fs:getRecentProjects', async () => {
   try {
     const recentFile = path.join(app.getPath('userData'), 'recent-projects.json');
-    
+
     if (!fs.existsSync(recentFile)) {
       return { success: true, projects: [] };
     }
@@ -251,7 +240,7 @@ ipcMain.handle('fs:getRecentProjects', async () => {
       try {
         const vocabData = JSON.parse(fs.readFileSync(vocabFile, 'utf-8'));
         const stats = fs.statSync(vocabFile);
-        
+
         projects.push({
           name: path.basename(projectPath),
           path: projectPath,
@@ -280,10 +269,10 @@ ipcMain.handle('fs:saveImage', async (_, projectPath: string, imageData: string,
 
     const extension = matches[1];
     const base64Data = matches[2];
-    
+
     // Generate filename if not provided
     const finalFileName = fileName || `image-${Date.now()}.${extension}`;
-    
+
     // Create images directory if it doesn't exist
     const imagesDir = path.join(projectPath, 'images');
     if (!fs.existsSync(imagesDir)) {
@@ -305,7 +294,7 @@ ipcMain.handle('fs:getImagePath', async (_, projectPath: string, relativePath: s
   try {
     // Convert relative path to absolute path
     const absolutePath = path.join(projectPath, relativePath);
-    
+
     if (!fs.existsSync(absolutePath)) {
       return { success: false, error: 'Image file not found' };
     }
@@ -330,7 +319,7 @@ ipcMain.handle('fs:appendToFile', async (_, filePath: string, content: string) =
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
-    
+
     // Append content to file
     fs.appendFileSync(filePath, content, 'utf-8');
     return { success: true };
@@ -372,7 +361,7 @@ ipcMain.handle('fs:exportProject', async (_, projectPath: string) => {
     }
 
     const exportPath = result.filePath;
-    
+
     // Create export directory
     if (!fs.existsSync(exportPath)) {
       fs.mkdirSync(exportPath, { recursive: true });
@@ -389,13 +378,13 @@ ipcMain.handle('fs:exportProject', async (_, projectPath: string) => {
     if (fs.existsSync(configFile)) {
       fs.copyFileSync(configFile, path.join(exportPath, 'config.json'));
     }
-    
+
     // Copy images directory
     const imagesDir = path.join(projectPath, 'images');
     if (fs.existsSync(imagesDir)) {
       const exportImagesDir = path.join(exportPath, 'images');
       fs.mkdirSync(exportImagesDir, { recursive: true });
-      
+
       const imageFiles = fs.readdirSync(imagesDir);
       for (const file of imageFiles) {
         fs.copyFileSync(
@@ -438,10 +427,10 @@ function saveRecentProject(projectPath: string) {
 
     // Remove if already exists
     data.projects = data.projects.filter(p => p !== projectPath);
-    
+
     // Add to front
     data.projects.unshift(projectPath);
-    
+
     // Keep only last 10
     data.projects = data.projects.slice(0, 10);
 
@@ -462,7 +451,7 @@ function createWindow() {
     width: 1200,
     height: 800,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
+      preload: path.join(__dirname, 'preload.cjs'),
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: false, // Disable sandbox to allow preload script

@@ -364,7 +364,22 @@ const Library: React.FC<LibraryProps> = ({ vocabulary, onEditWord, onRateWord, o
         }
       }
 
-      // Check for small-caps pattern \textsc{...}
+      // Check for small-caps pattern «...» (new syntax)
+      if (text[i] === '«') {
+        const end = text.indexOf('»', i + 1);
+        if (end !== -1) {
+          const scContent = text.substring(i + 1, end);
+          result.push(
+            <span key={key++} className="small-caps">
+              {renderTextWithLinks(scContent)}
+            </span>
+          );
+          i = end + 1;
+          continue;
+        }
+      }
+
+      // Check for small-caps pattern \textsc{...} (legacy syntax)
       if (text.substring(i, i + 8) === '\\textsc{') {
         const end = text.indexOf('}', i + 8);
         if (end !== -1) {
@@ -387,6 +402,7 @@ const Library: React.FC<LibraryProps> = ({ vocabulary, onEditWord, onRateWord, o
             (text[i] === '*' && text[i + 1] !== '*') ||
             text[i] === '_' ||
             text[i] === '~' ||
+            text[i] === '«' ||
             text.substring(i, i + 2) === '[[' ||
             text.substring(i, i + 8) === '\\textsc{') {
           break;

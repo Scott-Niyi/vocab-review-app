@@ -123,16 +123,32 @@ const Tags: React.FC<TagsProps> = ({
           continue;
         }
       }
-      
+
+      // Check for small-caps pattern \textsc{...}
+      if (text.substring(i, i + 8) === '\\textsc{') {
+        const end = text.indexOf('}', i + 8);
+        if (end !== -1) {
+          const scContent = text.substring(i + 8, end);
+          result.push(
+            <span key={key++} className="small-caps">
+              {renderTextWithLinks(scContent)}
+            </span>
+          );
+          i = end + 1;
+          continue;
+        }
+      }
+
       // Regular character
       let plainText = '';
-      while (i < text.length && 
-             text.substring(i, i + 2) !== '**' && 
-             text.substring(i, i + 2) !== '[[') {
+      while (i < text.length &&
+             text.substring(i, i + 2) !== '**' &&
+             text.substring(i, i + 2) !== '[[' &&
+             text.substring(i, i + 8) !== '\\textsc{') {
         plainText += text[i];
         i++;
       }
-      
+
       if (plainText) {
         result.push(plainText);
       }

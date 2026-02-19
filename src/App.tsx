@@ -573,6 +573,7 @@ function App() {
           onRateWord={handleLibraryRate}
           onDeleteWord={handleDeleteWord}
           projectPath={selectedProjectPath || ''} 
+          isActive={currentView === 'library'}
         />
       </div>
 

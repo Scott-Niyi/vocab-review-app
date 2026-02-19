@@ -8,5 +8,5 @@
     "strict": true,
     "outDir": "dist-electron"
   },
-  "include": ["vite.config.ts", "electron"]
+  "include": ["electron"]
 }

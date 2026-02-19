@@ -40,11 +40,19 @@ See also [[likewise|likewise]]
 点击后会跳转到 "likewise" 这个单词
 
 ### 小型大写字母
-使用 LaTeX 风格的命令：
+使用法文引号包裹文本：
 ```
-\textsc{small caps}
+«small caps»
 ```
 显示为：ꜱᴍᴀʟʟ ᴄᴀᴘꜱ
+
+例如：
+```
+The «nato» alliance
+«usa» and «uk»
+```
+
+注意：旧的 LaTeX 语法 `\textsc{text}` 已被弃用，请使用新的 `«text»` 语法。
 
 ### 老式数字
 使用波浪号包裹数字：
@@ -68,7 +76,8 @@ The G~7~ summit
 ```
 **粗体中包含 *斜体* 文本**
 *斜体中包含 [[link|链接]]*
-In the ~1800~s, \textsc{Europe} was...
+In the ~1800~s, «Europe» was...
+The «nato» alliance and covid-~19~ pandemic
 ```
 
 ## 自动括号包裹
@@ -93,16 +102,25 @@ In the ~1800~s, \textsc{Europe} was...
 - ✅ 添加了老式数字支持（使用 `~数字~` 语法）
 - ✅ 添加了斜体支持（使用 `*斜体*` 或 `_斜体_` 语法）
 - ✅ 修复了 Cmd+Z 在编辑框中影响背景搜索框的问题
+- ✅ 修复了 Cmd+Z 无法撤销格式化操作的问题（使用 document.execCommand）
+- ✅ 修复了中文输入法和 Caps Lock 时快捷键不工作的问题
+- ✅ 改进了 Small Caps 语法：从 `\textsc{}` 改为更简洁的 `«»`
 - ✅ 所有格式化快捷键现在支持两种模式：
   - 选中文本时：包裹选中的文本
   - 未选中时：插入占位符供输入
 
 ## 迁移说明
 
-如果你的旧数据中使用了 `\oldstylenums{数字}` 语法，可以运行根目录下的 `convert_oldstylenums.py` 脚本自动转换：
+如果你的旧数据中使用了 `\oldstylenums{数字}` 或 `\textsc{text}` 语法，可以运行根目录下的转换脚本自动转换：
 
 ```bash
+# 转换老式数字
 python3 convert_oldstylenums.py
+
+# 转换小型大写字母
+python3 convert_textsc.py
 ```
 
-该脚本会自动将所有 `\oldstylenums{XXX}` 转换为 `~XXX~`。
+这些脚本会自动将：
+- `\oldstylenums{XXX}` → `~XXX~`
+- `\textsc{XXX}` → `«XXX»`

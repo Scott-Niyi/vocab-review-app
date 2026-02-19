@@ -33,20 +33,13 @@ const RichTextInput: React.FC<RichTextInputProps> = ({ value, onChange, vocabula
     const selectedText = value.substring(start, end);
 
     if (selectedText) {
-      const newValue = value.substring(0, start) + `\\textsc{${selectedText}}` + value.substring(end);
-      onChange(newValue);
-      setTimeout(() => {
-        if (inputRef.current) {
-          inputRef.current.setSelectionRange(start + 8, start + 8 + selectedText.length);
-          inputRef.current.focus();
-        }
-      }, 0);
+      // Use document.execCommand for proper undo support
+      document.execCommand('insertText', false, `«${selectedText}»`);
     } else {
-      const newValue = value.substring(0, start) + `\\textsc{text}` + value.substring(end);
-      onChange(newValue);
+      document.execCommand('insertText', false, '«text»');
       setTimeout(() => {
         if (inputRef.current) {
-          inputRef.current.setSelectionRange(start + 8, start + 12);
+          inputRef.current.setSelectionRange(start + 1, start + 5);
           inputRef.current.focus();
         }
       }, 0);
@@ -60,17 +53,10 @@ const RichTextInput: React.FC<RichTextInputProps> = ({ value, onChange, vocabula
     const selectedText = value.substring(start, end);
 
     if (selectedText) {
-      const newValue = value.substring(0, start) + `~${selectedText}~` + value.substring(end);
-      onChange(newValue);
-      setTimeout(() => {
-        if (inputRef.current) {
-          inputRef.current.setSelectionRange(start + 1, start + 1 + selectedText.length);
-          inputRef.current.focus();
-        }
-      }, 0);
+      // Use document.execCommand for proper undo support
+      document.execCommand('insertText', false, `~${selectedText}~`);
     } else {
-      const newValue = value.substring(0, start) + `~123~` + value.substring(end);
-      onChange(newValue);
+      document.execCommand('insertText', false, '~123~');
       setTimeout(() => {
         if (inputRef.current) {
           inputRef.current.setSelectionRange(start + 1, start + 4);
@@ -87,17 +73,10 @@ const RichTextInput: React.FC<RichTextInputProps> = ({ value, onChange, vocabula
     const selectedText = value.substring(start, end);
     
     if (selectedText) {
-      const newValue = value.substring(0, start) + `**${selectedText}**` + value.substring(end);
-      onChange(newValue);
-      setTimeout(() => {
-        if (inputRef.current) {
-          inputRef.current.setSelectionRange(start + 2, start + 2 + selectedText.length);
-          inputRef.current.focus();
-        }
-      }, 0);
+      // Use document.execCommand for proper undo support
+      document.execCommand('insertText', false, `**${selectedText}**`);
     } else {
-      const newValue = value.substring(0, start) + `**text**` + value.substring(end);
-      onChange(newValue);
+      document.execCommand('insertText', false, '**text**');
       setTimeout(() => {
         if (inputRef.current) {
           inputRef.current.setSelectionRange(start + 2, start + 6);
@@ -114,17 +93,10 @@ const RichTextInput: React.FC<RichTextInputProps> = ({ value, onChange, vocabula
     const selectedText = value.substring(start, end);
     
     if (selectedText) {
-      const newValue = value.substring(0, start) + `*${selectedText}*` + value.substring(end);
-      onChange(newValue);
-      setTimeout(() => {
-        if (inputRef.current) {
-          inputRef.current.setSelectionRange(start + 1, start + 1 + selectedText.length);
-          inputRef.current.focus();
-        }
-      }, 0);
+      // Use document.execCommand for proper undo support
+      document.execCommand('insertText', false, `*${selectedText}*`);
     } else {
-      const newValue = value.substring(0, start) + `*text*` + value.substring(end);
-      onChange(newValue);
+      document.execCommand('insertText', false, '*text*');
       setTimeout(() => {
         if (inputRef.current) {
           inputRef.current.setSelectionRange(start + 1, start + 5);
@@ -185,28 +157,31 @@ const RichTextInput: React.FC<RichTextInputProps> = ({ value, onChange, vocabula
   // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Normalize key to lowercase for comparison
+      const key = e.key.toLowerCase();
+      
       // Ctrl/Cmd + B for bold
-      if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
+      if ((e.ctrlKey || e.metaKey) && key === 'b') {
         e.preventDefault();
         insertBold();
       }
       // Ctrl/Cmd + I for italic
-      if ((e.ctrlKey || e.metaKey) && e.key === 'i') {
+      if ((e.ctrlKey || e.metaKey) && key === 'i') {
         e.preventDefault();
         insertItalic();
       }
       // Ctrl/Cmd + K for link
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      if ((e.ctrlKey || e.metaKey) && key === 'k') {
         e.preventDefault();
         openLinkPicker();
       }
       // Shift + Ctrl/Cmd + C for small caps
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'c') {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && key === 'c') {
         e.preventDefault();
         insertSmallCaps();
       }
       // Shift + Ctrl/Cmd + N for oldstyle nums
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'n' || e.key === 'N')) {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && key === 'n') {
         e.preventDefault();
         insertOldstyleNums();
       }
@@ -256,7 +231,7 @@ const RichTextInput: React.FC<RichTextInputProps> = ({ value, onChange, vocabula
 
   // Render preview with formatting
   const renderPreview = (text: string) => {
-    const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*|_[^_]+_|~[^~]+~|\[\[[^\]]+\]\]|\\textsc\{[^}]+\})/g);
+    const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*|_[^_]+_|~[^~]+~|«[^»]+»|\[\[[^\]]+\]\]|\\textsc\{[^}]+\})/g);
 
     return parts.map((part, idx) => {
       // Handle bold text **...**
@@ -275,7 +250,12 @@ const RichTextInput: React.FC<RichTextInputProps> = ({ value, onChange, vocabula
         return <span key={idx} className="oldstyle-nums">{part.slice(1, -1)}</span>;
       }
 
-      // Handle small caps \textsc{...}
+      // Handle small caps «...» (new syntax)
+      if (part.startsWith('«') && part.endsWith('»')) {
+        return <span key={idx} className="small-caps">{part.slice(1, -1)}</span>;
+      }
+
+      // Handle small caps \textsc{...} (legacy syntax for backward compatibility)
       if (part.startsWith('\\textsc{') && part.endsWith('}')) {
         return <span key={idx} className="small-caps">{part.slice(8, -1)}</span>;
       }

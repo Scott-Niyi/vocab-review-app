@@ -137,13 +137,15 @@ That's it! The app will open automatically.
 **Rich Text Formatting**
 - `**bold**` for emphasis
 - `*italic*` or `_italic_` for italic text
-- `\textsc{text}` for ꜱᴍᴀʟʟ ᴄᴀᴘꜱ
+- `«text»` for ꜱᴍᴀʟʟ ᴄᴀᴘꜱ
 - `~123~` for oldstyle numbers (e.g., covid-~19~, G~7~)
 - `[[target|display]]` for hyperlinks to other words
 - Preview shows formatted result
 - All shortcuts work in two modes:
   - With text selected: wraps the selection
   - Without selection: inserts placeholder for typing
+- Proper undo/redo support with Cmd/Ctrl+Z
+- Works with Chinese input method and Caps Lock
 
 ### Settings
 

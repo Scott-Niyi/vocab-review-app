@@ -184,7 +184,22 @@ const WordCard: React.FC<WordCardProps> = ({
         }
       }
 
-      // Check for small-caps pattern \textsc{...}
+      // Check for small-caps pattern «...» (new syntax)
+      if (text[i] === '«') {
+        const end = text.indexOf('»', i + 1);
+        if (end !== -1) {
+          const scContent = text.substring(i + 1, end);
+          result.push(
+            <span key={key++} className="small-caps">
+              {renderTextWithLinks(scContent)}
+            </span>
+          );
+          i = end + 1;
+          continue;
+        }
+      }
+
+      // Check for small-caps pattern \textsc{...} (legacy syntax)
       if (text.substring(i, i + 8) === '\\textsc{') {
         const end = text.indexOf('}', i + 8);
         if (end !== -1) {
@@ -207,6 +222,7 @@ const WordCard: React.FC<WordCardProps> = ({
             (text[i] === '*' && text[i + 1] !== '*') ||
             text[i] === '_' ||
             text[i] === '~' ||
+            text[i] === '«' ||
             text.substring(i, i + 2) === '[[' ||
             text.substring(i, i + 8) === '\\textsc{') {
           break;
@@ -267,12 +283,12 @@ const WordCard: React.FC<WordCardProps> = ({
       return;
     }
     
-    // w/s keys to scroll word card content
-    if (key === 'w' || key === 's') {
+    // w/s keys to scroll word card content (case-insensitive for Caps Lock support)
+    if (key.toLowerCase() === 'w' || key.toLowerCase() === 's') {
       e.preventDefault();
       if (wordCardRef.current) {
         const scrollAmount = 100; // pixels to scroll
-        if (key === 'w') {
+        if (key.toLowerCase() === 'w') {
           wordCardRef.current.scrollTop -= scrollAmount;
         } else {
           wordCardRef.current.scrollTop += scrollAmount;
@@ -281,8 +297,8 @@ const WordCard: React.FC<WordCardProps> = ({
       return;
     }
 
-    // e key to edit
-    if (key === 'e') {
+    // e key to edit (case-insensitive for Caps Lock support)
+    if (key.toLowerCase() === 'e') {
       e.preventDefault();
       onEdit();
       return;
@@ -302,11 +318,11 @@ const WordCard: React.FC<WordCardProps> = ({
       setShowDefinition(false);
       setSelectedRating(null);
     } 
-    // Arrow keys or vim keys to select
-    else if (key === 'ArrowUp' || key === 'k') {
+    // Arrow keys or vim keys to select (case-insensitive for Caps Lock support)
+    else if (key === 'ArrowUp' || key.toLowerCase() === 'k') {
       e.preventDefault();
       setSelectedRating(prev => Math.max(1, (prev || 3) - 1));
-    } else if (key === 'ArrowDown' || key === 'j') {
+    } else if (key === 'ArrowDown' || key.toLowerCase() === 'j') {
       e.preventDefault();
       setSelectedRating(prev => Math.min(5, (prev || 3) + 1));
     } 
