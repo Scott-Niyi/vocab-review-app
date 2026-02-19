@@ -265,6 +265,11 @@ const Library: React.FC<LibraryProps> = ({ vocabulary, onEditWord, onRateWord, o
           );
           i = end + 2;
           continue;
+        } else {
+          // Malformed: no closing **, treat as plain text
+          result.push(text[i]);
+          i++;
+          continue;
         }
       }
       
@@ -286,6 +291,11 @@ const Library: React.FC<LibraryProps> = ({ vocabulary, onEditWord, onRateWord, o
           );
           i = end + 1;
           continue;
+        } else {
+          // Malformed: no closing *, treat as plain text
+          result.push(text[i]);
+          i++;
+          continue;
         }
       }
       
@@ -306,6 +316,11 @@ const Library: React.FC<LibraryProps> = ({ vocabulary, onEditWord, onRateWord, o
             </em>
           );
           i = end + 1;
+          continue;
+        } else {
+          // Malformed: no closing _, treat as plain text
+          result.push(text[i]);
+          i++;
           continue;
         }
       }
@@ -340,6 +355,11 @@ const Library: React.FC<LibraryProps> = ({ vocabulary, onEditWord, onRateWord, o
           
           i = end + 2;
           continue;
+        } else {
+          // Malformed link: no closing ]], treat as plain text
+          result.push(text[i]);
+          i++;
+          continue;
         }
       }
 
@@ -361,6 +381,11 @@ const Library: React.FC<LibraryProps> = ({ vocabulary, onEditWord, onRateWord, o
           );
           i = end + 1;
           continue;
+        } else {
+          // Malformed: no closing ~, treat as plain text
+          result.push(text[i]);
+          i++;
+          continue;
         }
       }
 
@@ -376,6 +401,11 @@ const Library: React.FC<LibraryProps> = ({ vocabulary, onEditWord, onRateWord, o
           );
           i = end + 1;
           continue;
+        } else {
+          // Malformed: no closing », treat as plain text
+          result.push(text[i]);
+          i++;
+          continue;
         }
       }
 
@@ -390,6 +420,11 @@ const Library: React.FC<LibraryProps> = ({ vocabulary, onEditWord, onRateWord, o
             </span>
           );
           i = end + 1;
+          continue;
+        } else {
+          // Malformed: no closing }, treat as plain text
+          result.push(text[i]);
+          i++;
           continue;
         }
       }

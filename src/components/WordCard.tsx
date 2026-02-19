@@ -85,6 +85,11 @@ const WordCard: React.FC<WordCardProps> = ({
           );
           i = end + 2;
           continue;
+        } else {
+          // Malformed: no closing **, treat as plain text
+          result.push(text[i]);
+          i++;
+          continue;
         }
       }
       
@@ -106,6 +111,11 @@ const WordCard: React.FC<WordCardProps> = ({
           );
           i = end + 1;
           continue;
+        } else {
+          // Malformed: no closing *, treat as plain text
+          result.push(text[i]);
+          i++;
+          continue;
         }
       }
       
@@ -126,6 +136,11 @@ const WordCard: React.FC<WordCardProps> = ({
             </em>
           );
           i = end + 1;
+          continue;
+        } else {
+          // Malformed: no closing _, treat as plain text
+          result.push(text[i]);
+          i++;
           continue;
         }
       }
@@ -160,6 +175,11 @@ const WordCard: React.FC<WordCardProps> = ({
           
           i = end + 2;
           continue;
+        } else {
+          // Malformed link: no closing ]], treat as plain text
+          result.push(text[i]);
+          i++;
+          continue;
         }
       }
 
@@ -181,6 +201,11 @@ const WordCard: React.FC<WordCardProps> = ({
           );
           i = end + 1;
           continue;
+        } else {
+          // Malformed: no closing ~, treat as plain text
+          result.push(text[i]);
+          i++;
+          continue;
         }
       }
 
@@ -196,6 +221,11 @@ const WordCard: React.FC<WordCardProps> = ({
           );
           i = end + 1;
           continue;
+        } else {
+          // Malformed: no closing », treat as plain text
+          result.push(text[i]);
+          i++;
+          continue;
         }
       }
 
@@ -210,6 +240,11 @@ const WordCard: React.FC<WordCardProps> = ({
             </span>
           );
           i = end + 1;
+          continue;
+        } else {
+          // Malformed: no closing }, treat as plain text
+          result.push(text[i]);
+          i++;
           continue;
         }
       }
