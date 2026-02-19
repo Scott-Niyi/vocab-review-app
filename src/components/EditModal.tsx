@@ -125,12 +125,22 @@ const EditModal: React.FC<EditModalProps> = ({ entry, vocabulary, onSave, onClos
         return; // Let the input handle it
       }
       
-      // Allow Cmd/Ctrl+B and Cmd/Ctrl+K in textareas (for RichTextInput)
-      if (isInInput && (e.metaKey || e.ctrlKey) && (e.key === 'b' || e.key === 'k')) {
-        return; // Let RichTextInput handle it
+      // Allow Cmd/Ctrl+B, Cmd/Ctrl+K, Cmd/Ctrl+I, Cmd/Ctrl+Shift+S, Cmd/Ctrl+Shift+N in textareas (for RichTextInput)
+      if (isInInput && (e.metaKey || e.ctrlKey)) {
+        const key = e.key.toLowerCase();
+        if (key === 'b' || key === 'k' || key === 'i' || key === 's' || key === 'n') {
+          return; // Let RichTextInput handle it
+        }
+        
+        // Allow Cmd/Ctrl+Z (undo) and Cmd/Ctrl+Shift+Z (redo) ONLY in input fields
+        // Stop them from bubbling to background components (like Library search)
+        if (key === 'z') {
+          e.stopPropagation();
+          return; // Let the input field handle undo/redo
+        }
       }
       
-      // Stop propagation to prevent WordCard from handling keys
+      // Stop propagation to prevent WordCard and Library from handling keys
       e.stopPropagation();
       
       if (e.key === 'Escape') {

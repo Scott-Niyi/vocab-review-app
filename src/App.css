@@ -268,7 +268,6 @@ body {
   max-height: 70vh;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   overflow-y: auto;
   scroll-behavior: smooth;
 }
@@ -315,7 +314,7 @@ body {
 }
 
 .variant-item {
-  font-size: 1rem;
+  font-size: calc(1rem * var(--content-font-size-multiplier));
   color: #666;
   font-weight: 300;
   font-style: italic;
@@ -473,6 +472,11 @@ body {
 .inline-hyperlink:hover {
   color: #1a1a1a;
   text-decoration-color: #1a1a1a;
+}
+
+.small-caps {
+  font-family: Cambria, 'Times New Roman', serif;
+  font-variant: small-caps;
 }
 
 .rating-container {
@@ -3529,4 +3533,79 @@ body {
   color: #6c757d;
   margin-top: 0.25rem;
   line-height: 1.4;
+}
+
+/* Italic text styling */
+.definition-text em,
+.example-item em,
+.sub-definition-text em,
+.rich-text-preview-content em {
+  font-style: italic;
+  font-size: inherit;
+}
+
+/* Ensure italic text respects font size multiplier */
+em {
+  font-style: italic;
+}
+
+/* Oldstyle numbers styling */
+.oldstyle-nums {
+  font-family: Cambria, 'Hoefler Text', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+  font-variant-numeric: oldstyle-nums;
+  font-feature-settings: "onum" 1;
+}
+
+/* Fallback for browsers that don't support font-variant-numeric */
+@supports not (font-variant-numeric: oldstyle-nums) {
+  .oldstyle-nums {
+    font-family: 'EB Garamond', Cambria, 'Hoefler Text', Georgia, serif;
+  }
+}
+
+/* Toolbar button tooltips */
+.toolbar-button {
+  position: relative;
+}
+
+.toolbar-button::after {
+  content: attr(title);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-8px);
+  padding: 0.4rem 0.6rem;
+  background: #1a1a1a;
+  color: white;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  border-radius: 4px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+  z-index: 1000;
+}
+
+.toolbar-button::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-2px);
+  border: 4px solid transparent;
+  border-top-color: #1a1a1a;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+  z-index: 1000;
+}
+
+.toolbar-button:hover::after,
+.toolbar-button:hover::before {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-4px);
+}
+
+.toolbar-button:hover::before {
+  transform: translateX(-50%) translateY(2px);
 }

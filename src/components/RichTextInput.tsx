@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { VocabularyEntry } from '../types/vocabulary';
 
 interface RichTextInputProps {
@@ -25,6 +25,138 @@ const RichTextInput: React.FC<RichTextInputProps> = ({ value, onChange, vocabula
     setSelectedIndex(0);
   }, [linkSearch]);
 
+  // Define all callback functions first
+  const insertSmallCaps = useCallback(() => {
+    if (!inputRef.current) return;
+    const start = inputRef.current.selectionStart;
+    const end = inputRef.current.selectionEnd;
+    const selectedText = value.substring(start, end);
+
+    if (selectedText) {
+      const newValue = value.substring(0, start) + `\\textsc{${selectedText}}` + value.substring(end);
+      onChange(newValue);
+      setTimeout(() => {
+        if (inputRef.current) {
+          inputRef.current.setSelectionRange(start + 8, start + 8 + selectedText.length);
+          inputRef.current.focus();
+        }
+      }, 0);
+    } else {
+      const newValue = value.substring(0, start) + `\\textsc{text}` + value.substring(end);
+      onChange(newValue);
+      setTimeout(() => {
+        if (inputRef.current) {
+          inputRef.current.setSelectionRange(start + 8, start + 12);
+          inputRef.current.focus();
+        }
+      }, 0);
+    }
+  }, [value, onChange]);
+
+  const insertOldstyleNums = useCallback(() => {
+    if (!inputRef.current) return;
+    const start = inputRef.current.selectionStart;
+    const end = inputRef.current.selectionEnd;
+    const selectedText = value.substring(start, end);
+
+    if (selectedText) {
+      const newValue = value.substring(0, start) + `~${selectedText}~` + value.substring(end);
+      onChange(newValue);
+      setTimeout(() => {
+        if (inputRef.current) {
+          inputRef.current.setSelectionRange(start + 1, start + 1 + selectedText.length);
+          inputRef.current.focus();
+        }
+      }, 0);
+    } else {
+      const newValue = value.substring(0, start) + `~123~` + value.substring(end);
+      onChange(newValue);
+      setTimeout(() => {
+        if (inputRef.current) {
+          inputRef.current.setSelectionRange(start + 1, start + 4);
+          inputRef.current.focus();
+        }
+      }, 0);
+    }
+  }, [value, onChange]);
+
+  const insertBold = useCallback(() => {
+    if (!inputRef.current) return;
+    const start = inputRef.current.selectionStart;
+    const end = inputRef.current.selectionEnd;
+    const selectedText = value.substring(start, end);
+    
+    if (selectedText) {
+      const newValue = value.substring(0, start) + `**${selectedText}**` + value.substring(end);
+      onChange(newValue);
+      setTimeout(() => {
+        if (inputRef.current) {
+          inputRef.current.setSelectionRange(start + 2, start + 2 + selectedText.length);
+          inputRef.current.focus();
+        }
+      }, 0);
+    } else {
+      const newValue = value.substring(0, start) + `**text**` + value.substring(end);
+      onChange(newValue);
+      setTimeout(() => {
+        if (inputRef.current) {
+          inputRef.current.setSelectionRange(start + 2, start + 6);
+          inputRef.current.focus();
+        }
+      }, 0);
+    }
+  }, [value, onChange]);
+
+  const insertItalic = useCallback(() => {
+    if (!inputRef.current) return;
+    const start = inputRef.current.selectionStart;
+    const end = inputRef.current.selectionEnd;
+    const selectedText = value.substring(start, end);
+    
+    if (selectedText) {
+      const newValue = value.substring(0, start) + `*${selectedText}*` + value.substring(end);
+      onChange(newValue);
+      setTimeout(() => {
+        if (inputRef.current) {
+          inputRef.current.setSelectionRange(start + 1, start + 1 + selectedText.length);
+          inputRef.current.focus();
+        }
+      }, 0);
+    } else {
+      const newValue = value.substring(0, start) + `*text*` + value.substring(end);
+      onChange(newValue);
+      setTimeout(() => {
+        if (inputRef.current) {
+          inputRef.current.setSelectionRange(start + 1, start + 5);
+          inputRef.current.focus();
+        }
+      }, 0);
+    }
+  }, [value, onChange]);
+
+  const openLinkPicker = useCallback(() => {
+    if (inputRef.current) {
+      setCursorPosition(inputRef.current.selectionStart);
+    }
+    setShowLinkPicker(true);
+    setLinkSearch('');
+  }, []);
+
+  const insertLink = useCallback((word: VocabularyEntry) => {
+    const linkText = `[[${word.word}|${word.word}]]`;
+    const newValue = value.substring(0, cursorPosition) + linkText + value.substring(cursorPosition);
+    onChange(newValue);
+    setShowLinkPicker(false);
+    
+    setTimeout(() => {
+      if (inputRef.current) {
+        const newPos = cursorPosition + linkText.length;
+        inputRef.current.setSelectionRange(newPos, newPos);
+        inputRef.current.focus();
+      }
+    }, 0);
+  }, [value, cursorPosition, onChange]);
+
   // Handle keyboard navigation in link picker
   useEffect(() => {
     if (!showLinkPicker) return;
@@ -41,15 +173,14 @@ const RichTextInput: React.FC<RichTextInputProps> = ({ value, onChange, vocabula
         insertLink(filteredWords[selectedIndex]);
       } else if (e.key === 'Escape') {
         e.preventDefault();
-        e.stopPropagation(); // Prevent event from bubbling to EditModal
+        e.stopPropagation();
         setShowLinkPicker(false);
       }
     };
 
-    // Use capture phase to intercept before EditModal
     window.addEventListener('keydown', handleKeyDown, true);
     return () => window.removeEventListener('keydown', handleKeyDown, true);
-  }, [showLinkPicker, filteredWords, selectedIndex]);
+  }, [showLinkPicker, filteredWords, selectedIndex, insertLink]);
 
   // Handle keyboard shortcuts
   useEffect(() => {
@@ -59,10 +190,25 @@ const RichTextInput: React.FC<RichTextInputProps> = ({ value, onChange, vocabula
         e.preventDefault();
         insertBold();
       }
+      // Ctrl/Cmd + I for italic
+      if ((e.ctrlKey || e.metaKey) && e.key === 'i') {
+        e.preventDefault();
+        insertItalic();
+      }
       // Ctrl/Cmd + K for link
       if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
         e.preventDefault();
         openLinkPicker();
+      }
+      // Shift + Ctrl/Cmd + C for small caps
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'c') {
+        e.preventDefault();
+        insertSmallCaps();
+      }
+      // Shift + Ctrl/Cmd + N for oldstyle nums
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'n' || e.key === 'N')) {
+        e.preventDefault();
+        insertOldstyleNums();
       }
       
       // Auto-wrap with brackets/quotes when text is selected
@@ -106,87 +252,46 @@ const RichTextInput: React.FC<RichTextInputProps> = ({ value, onChange, vocabula
       textarea.addEventListener('keydown', handleKeyDown);
       return () => textarea.removeEventListener('keydown', handleKeyDown);
     }
-  }, [value]);
-
-  const insertBold = () => {
-    if (!inputRef.current) return;
-    const start = inputRef.current.selectionStart;
-    const end = inputRef.current.selectionEnd;
-    const selectedText = value.substring(start, end);
-    
-    if (selectedText) {
-      // If text is selected, wrap it with **
-      const newValue = value.substring(0, start) + `**${selectedText}**` + value.substring(end);
-      onChange(newValue);
-      
-      // Keep the wrapped text selected
-      setTimeout(() => {
-        if (inputRef.current) {
-          inputRef.current.setSelectionRange(start + 2, start + 2 + selectedText.length);
-          inputRef.current.focus();
-        }
-      }, 0);
-    } else {
-      // If no text selected, insert **text** and select "text"
-      const newValue = value.substring(0, start) + `**text**` + value.substring(end);
-      onChange(newValue);
-      
-      // Select "text" so user can immediately type to replace it
-      setTimeout(() => {
-        if (inputRef.current) {
-          inputRef.current.setSelectionRange(start + 2, start + 6); // Select "text"
-          inputRef.current.focus();
-        }
-      }, 0);
-    }
-  };
-
-  const openLinkPicker = () => {
-    if (inputRef.current) {
-      setCursorPosition(inputRef.current.selectionStart);
-    }
-    setShowLinkPicker(true);
-    setLinkSearch('');
-  };
-
-  const insertLink = (word: VocabularyEntry) => {
-    const linkText = `[[${word.word}|${word.word}]]`;
-    const newValue = value.substring(0, cursorPosition) + linkText + value.substring(cursorPosition);
-    onChange(newValue);
-    setShowLinkPicker(false);
-    
-    // Focus back on input
-    setTimeout(() => {
-      if (inputRef.current) {
-        const newPos = cursorPosition + linkText.length;
-        inputRef.current.setSelectionRange(newPos, newPos);
-        inputRef.current.focus();
-      }
-    }, 0);
-  };
+  }, [value, insertBold, insertItalic, insertSmallCaps, insertOldstyleNums, openLinkPicker, onChange]);
 
   // Render preview with formatting
   const renderPreview = (text: string) => {
-    const parts = text.split(/(\*\*[^*]+\*\*|\[\[[^\]]+\]\])/g);
-    
+    const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*|_[^_]+_|~[^~]+~|\[\[[^\]]+\]\]|\\textsc\{[^}]+\})/g);
+
     return parts.map((part, idx) => {
-      // Handle bold text
+      // Handle bold text **...**
       if (part.startsWith('**') && part.endsWith('**')) {
         return <strong key={idx}>{part.slice(2, -2)}</strong>;
       }
-      
+
+      // Handle italic text *...* or _..._
+      if ((part.startsWith('*') && part.endsWith('*') && !part.startsWith('**')) ||
+          (part.startsWith('_') && part.endsWith('_'))) {
+        return <em key={idx}>{part.slice(1, -1)}</em>;
+      }
+
+      // Handle oldstyle nums ~...~
+      if (part.startsWith('~') && part.endsWith('~')) {
+        return <span key={idx} className="oldstyle-nums">{part.slice(1, -1)}</span>;
+      }
+
+      // Handle small caps \textsc{...}
+      if (part.startsWith('\\textsc{') && part.endsWith('}')) {
+        return <span key={idx} className="small-caps">{part.slice(8, -1)}</span>;
+      }
+
       // Handle hyperlinks [[target|displayText]]
       if (part.startsWith('[[') && part.endsWith(']]')) {
         const linkContent = part.slice(2, -2);
         const [, displayText] = linkContent.split('|');
-        
+
         return (
           <span key={idx} className="preview-link">
             {displayText || linkContent}
           </span>
         );
       }
-      
+
       return <span key={idx}>{part}</span>;
     });
   };
@@ -205,10 +310,34 @@ const RichTextInput: React.FC<RichTextInputProps> = ({ value, onChange, vocabula
         <button
           type="button"
           className="toolbar-button"
+          onClick={insertItalic}
+          title="Italic (Ctrl/Cmd+I)"
+        >
+          <em>I</em>
+        </button>
+        <button
+          type="button"
+          className="toolbar-button"
           onClick={openLinkPicker}
           title="Insert link (Ctrl/Cmd+K)"
         >
           Link
+        </button>
+        <button
+          type="button"
+          className="toolbar-button"
+          onClick={insertSmallCaps}
+          title="Small Caps (Shift+Cmd+C)"
+        >
+          <span style={{ fontFamily: 'Cambria, serif', fontVariant: 'small-caps' }}>Sc</span>
+        </button>
+        <button
+          type="button"
+          className="toolbar-button"
+          onClick={insertOldstyleNums}
+          title="Oldstyle Numbers (Shift+Cmd+N)"
+        >
+          <span style={{ fontFamily: 'Cambria, serif', fontVariant: 'oldstyle-nums' }}>123</span>
         </button>
         <div className="toolbar-divider"></div>
         <button

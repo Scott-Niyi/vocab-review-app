@@ -14,7 +14,12 @@ An intelligent vocabulary learning application with spaced repetition algorithm,
 - **Review Mode**: `1-5` for direct rating, `Space/Tab` to reveal, `E` to edit, `ESC` to end
 - **Navigation**: `← →` or `[ ]` to browse reviewed words, `Backspace` to go back
 - **IPA Input**: Type shortcuts like `A` + `Tab` → `ɑ`, `S` + `Tab` → `ʃ`
-- **Rich Text**: `Cmd/Ctrl+B` for bold, `Cmd/Ctrl+K` for hyperlinks
+- **Rich Text Formatting**:
+  - `Cmd/Ctrl+B` for **bold**
+  - `Cmd/Ctrl+I` for *italic*
+  - `Cmd/Ctrl+K` for hyperlinks
+  - `Shift+Cmd/Ctrl+C` for ꜱᴍᴀʟʟ ᴄᴀᴘꜱ
+  - `Shift+Cmd/Ctrl+N` for oldstyle numbers (~19~)
 
 ### 🔗 Advanced Features
 - **Hyperlink Navigation** - Jump between related words with `[[word|text]]` syntax
@@ -131,8 +136,14 @@ That's it! The app will open automatically.
 
 **Rich Text Formatting**
 - `**bold**` for emphasis
-- `[[target|display]]` for hyperlinks
+- `*italic*` or `_italic_` for italic text
+- `\textsc{text}` for ꜱᴍᴀʟʟ ᴄᴀᴘꜱ
+- `~123~` for oldstyle numbers (e.g., covid-~19~, G~7~)
+- `[[target|display]]` for hyperlinks to other words
 - Preview shows formatted result
+- All shortcuts work in two modes:
+  - With text selected: wraps the selection
+  - Without selection: inserts placeholder for typing
 
 ### Settings
 
@@ -220,6 +231,7 @@ vocab-review-app/
 
 ## 📚 Documentation
 
+- [FORMATTING-GUIDE.md](./FORMATTING-GUIDE.md) - Text formatting reference (bold, italic, small caps, oldstyle numbers, links)
 - [QUICK-START.md](./docs/QUICK-START.md) - Detailed getting started
 - [IPA-INPUT-GUIDE.md](./docs/IPA-INPUT-GUIDE.md) - IPA shortcuts reference
 - [CLOUD-LLM-SETUP-GUIDE.md](./docs/CLOUD-LLM-SETUP-GUIDE.md) - AI setup guide

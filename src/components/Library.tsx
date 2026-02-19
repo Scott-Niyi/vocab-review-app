@@ -11,9 +11,10 @@ interface LibraryProps {
   onRateWord?: (wordId: number, rating: 1 | 2 | 3 | 4 | 5) => void;
   onDeleteWord?: (wordId: number) => void;
   projectPath: string;
+  isActive?: boolean;
 }
 
-const Library: React.FC<LibraryProps> = ({ vocabulary, onEditWord, onRateWord, onDeleteWord, projectPath }) => {
+const Library: React.FC<LibraryProps> = ({ vocabulary, onEditWord, onRateWord, onDeleteWord, projectPath, isActive = true }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedWord, setSelectedWord] = useState<VocabularyEntry | null>(null);
   const [selectedRating, setSelectedRating] = useState<number | null>(null);
@@ -142,6 +143,9 @@ const Library: React.FC<LibraryProps> = ({ vocabulary, onEditWord, onRateWord, o
 
   // Focus search on "/" key and handle Cmd+Down to jump to bottom
   useEffect(() => {
+    // Only listen to keyboard events when Library is active
+    if (!isActive) return;
+    
     const handleKeyPress = (e: KeyboardEvent) => {
       // Don't intercept if user is typing in an input
       const target = e.target as HTMLElement;
@@ -228,9 +232,9 @@ const Library: React.FC<LibraryProps> = ({ vocabulary, onEditWord, onRateWord, o
     };
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [filteredWords, selectedWord, onEditWord]);
+  }, [filteredWords, selectedWord, onEditWord, isActive]);
 
-  // Parse markdown-style bold (**text**) and hyperlinks [[target|text]] in examples/definitions
+  // Parse markdown-style bold (**text**), italic (*text* or _text_) and hyperlinks [[target|text]] in examples/definitions
   // Supports nested patterns like **bold with [[link]]**
   const renderTextWithLinks = (text: string) => {
     const result: React.ReactNode[] = [];
@@ -260,6 +264,48 @@ const Library: React.FC<LibraryProps> = ({ vocabulary, onEditWord, onRateWord, o
             </strong>
           );
           i = end + 2;
+          continue;
+        }
+      }
+      
+      // Check for italic pattern *...* (single asterisk, not double)
+      if (text[i] === '*' && text[i + 1] !== '*') {
+        // Find the closing *
+        let end = i + 1;
+        while (end < text.length && text[end] !== '*') {
+          end++;
+        }
+        
+        if (end < text.length) {
+          // Found matching closing *
+          const italicContent = text.substring(i + 1, end);
+          result.push(
+            <em key={key++}>
+              {renderTextWithLinks(italicContent)}
+            </em>
+          );
+          i = end + 1;
+          continue;
+        }
+      }
+      
+      // Check for italic pattern _..._
+      if (text[i] === '_') {
+        // Find the closing _
+        let end = i + 1;
+        while (end < text.length && text[end] !== '_') {
+          end++;
+        }
+        
+        if (end < text.length) {
+          // Found matching closing _
+          const italicContent = text.substring(i + 1, end);
+          result.push(
+            <em key={key++}>
+              {renderTextWithLinks(italicContent)}
+            </em>
+          );
+          i = end + 1;
           continue;
         }
       }
@@ -296,16 +342,59 @@ const Library: React.FC<LibraryProps> = ({ vocabulary, onEditWord, onRateWord, o
           continue;
         }
       }
-      
+
+      // Check for oldstyle nums pattern ~...~
+      if (text[i] === '~') {
+        // Find the closing ~
+        let end = i + 1;
+        while (end < text.length && text[end] !== '~') {
+          end++;
+        }
+        
+        if (end < text.length) {
+          // Found matching closing ~
+          const numContent = text.substring(i + 1, end);
+          result.push(
+            <span key={key++} className="oldstyle-nums">
+              {numContent}
+            </span>
+          );
+          i = end + 1;
+          continue;
+        }
+      }
+
+      // Check for small-caps pattern \textsc{...}
+      if (text.substring(i, i + 8) === '\\textsc{') {
+        const end = text.indexOf('}', i + 8);
+        if (end !== -1) {
+          const scContent = text.substring(i + 8, end);
+          result.push(
+            <span key={key++} className="small-caps">
+              {renderTextWithLinks(scContent)}
+            </span>
+          );
+          i = end + 1;
+          continue;
+        }
+      }
+
       // Regular character
       let plainText = '';
-      while (i < text.length && 
-             text.substring(i, i + 2) !== '**' && 
-             text.substring(i, i + 2) !== '[[') {
+      while (i < text.length) {
+        // Check if we're at the start of any special pattern
+        if (text.substring(i, i + 2) === '**' ||
+            (text[i] === '*' && text[i + 1] !== '*') ||
+            text[i] === '_' ||
+            text[i] === '~' ||
+            text.substring(i, i + 2) === '[[' ||
+            text.substring(i, i + 8) === '\\textsc{') {
+          break;
+        }
         plainText += text[i];
         i++;
       }
-      
+
       if (plainText) {
         result.push(plainText);
       }

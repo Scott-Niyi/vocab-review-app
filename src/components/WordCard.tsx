@@ -88,6 +88,48 @@ const WordCard: React.FC<WordCardProps> = ({
         }
       }
       
+      // Check for italic pattern *...* (single asterisk, not double)
+      if (text[i] === '*' && text[i + 1] !== '*') {
+        // Find the closing *
+        let end = i + 1;
+        while (end < text.length && text[end] !== '*') {
+          end++;
+        }
+        
+        if (end < text.length) {
+          // Found matching closing *
+          const italicContent = text.substring(i + 1, end);
+          result.push(
+            <em key={key++}>
+              {renderTextWithLinks(italicContent)}
+            </em>
+          );
+          i = end + 1;
+          continue;
+        }
+      }
+      
+      // Check for italic pattern _..._
+      if (text[i] === '_') {
+        // Find the closing _
+        let end = i + 1;
+        while (end < text.length && text[end] !== '_') {
+          end++;
+        }
+        
+        if (end < text.length) {
+          // Found matching closing _
+          const italicContent = text.substring(i + 1, end);
+          result.push(
+            <em key={key++}>
+              {renderTextWithLinks(italicContent)}
+            </em>
+          );
+          i = end + 1;
+          continue;
+        }
+      }
+      
       // Check for hyperlink pattern [[...]]
       if (text.substring(i, i + 2) === '[[') {
         // Find the closing ]]
@@ -120,21 +162,64 @@ const WordCard: React.FC<WordCardProps> = ({
           continue;
         }
       }
-      
+
+      // Check for oldstyle nums pattern ~...~
+      if (text[i] === '~') {
+        // Find the closing ~
+        let end = i + 1;
+        while (end < text.length && text[end] !== '~') {
+          end++;
+        }
+        
+        if (end < text.length) {
+          // Found matching closing ~
+          const numContent = text.substring(i + 1, end);
+          result.push(
+            <span key={key++} className="oldstyle-nums">
+              {numContent}
+            </span>
+          );
+          i = end + 1;
+          continue;
+        }
+      }
+
+      // Check for small-caps pattern \textsc{...}
+      if (text.substring(i, i + 8) === '\\textsc{') {
+        const end = text.indexOf('}', i + 8);
+        if (end !== -1) {
+          const scContent = text.substring(i + 8, end);
+          result.push(
+            <span key={key++} className="small-caps">
+              {renderTextWithLinks(scContent)}
+            </span>
+          );
+          i = end + 1;
+          continue;
+        }
+      }
+
       // Regular character
       let plainText = '';
-      while (i < text.length && 
-             text.substring(i, i + 2) !== '**' && 
-             text.substring(i, i + 2) !== '[[') {
+      while (i < text.length) {
+        // Check if we're at the start of any special pattern
+        if (text.substring(i, i + 2) === '**' ||
+            (text[i] === '*' && text[i + 1] !== '*') ||
+            text[i] === '_' ||
+            text[i] === '~' ||
+            text.substring(i, i + 2) === '[[' ||
+            text.substring(i, i + 8) === '\\textsc{') {
+          break;
+        }
         plainText += text[i];
         i++;
       }
-      
+
       if (plainText) {
         result.push(plainText);
       }
     }
-    
+
     return result;
   };
 
@@ -144,7 +229,9 @@ const WordCard: React.FC<WordCardProps> = ({
     const isInputFocused = target.tagName === 'INPUT' || 
                           target.tagName === 'TEXTAREA' || 
                           target.isContentEditable ||
-                          target.closest('.modal-overlay');
+                          target.closest('.modal-overlay') ||
+                          target.closest('.library-container') ||
+                          target.closest('.tags-page-container');
     
     if (isInputFocused) {
       return; // Let the input handle the key
